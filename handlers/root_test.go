@@ -15,18 +15,26 @@ type RootTestSuite struct {
 	e *echo.Echo
 }
 
+/*-------------------Setups/Teardowns-------------------*/
+
 func (suite *RootTestSuite) SetupTest() {
 	suite.e = echo.New()
 }
 
-func (suite *RootTestSuite) TestRootHandler() {
+/*-------------------Tests------------------------------*/
+
+func (suite *RootTestSuite) TestRootRedirectsToRoom() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	c := suite.e.NewContext(req, rec)
-	if assert.NoError(suite.T(), RootHandler(c)) {
-		assert.Equal(suite.T(), http.StatusOK, rec.Code)
+
+	roomId := RootHandler(c)
+	if assert.NoError(suite.T(), roomId) {
+		assert.Equal(suite.T(), roomId, rec.HeaderMap.Get("Location"))
 	}
 }
+
+/*-------------------Test Runner------------------------*/
 
 func TestRootTestSuite(t *testing.T) {
 	suite.Run(t, new(RootTestSuite))
