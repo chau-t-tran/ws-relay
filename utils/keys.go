@@ -1,12 +1,14 @@
 package utils
 
-import "crypto/rand"
+import "math/rand"
 
 func RandomKey(n int) string {
-	key := make([]byte, n)
-	if _, err := rand.Read(key); err != nil {
-		panic(err)
+	s := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var k []rune
+
+	for i := 0; i < n; i++ {
+		k = append(k, rune(s[rand.Intn(len(s))]))
 	}
 
-	return string(key)
+	return string(k)
 }

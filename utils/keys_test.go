@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,8 @@ func (suite *RootTestSuite) TestRandomKeysAreDifferent() {
 	n := 7
 	m := make(map[string]bool)
 	for i := 1; i < 5000; i++ {
-		key := randomKey(n)
+		key := RandomKey(n)
+		fmt.Println(key)
 		_, found := m[key]
 		assert.True(suite.T(), !found, "Key collision!")
 
