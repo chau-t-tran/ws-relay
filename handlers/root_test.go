@@ -36,7 +36,7 @@ func (suite *RootTestSuite) TestRootRedirectsToRoom() {
 	c := suite.e.NewContext(req, rec)
 
 	rand.Seed(int64(suite.seed))
-	key := utils.RandomKey(suite.keyLength)
+	key := "/" + utils.RandomKey(suite.keyLength)
 	rand.Seed(int64(suite.seed))
 
 	if assert.NoError(suite.T(), RootHandler(c)) {
