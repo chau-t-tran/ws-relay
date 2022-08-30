@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/chau-t-tran/ws-relay/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -12,13 +15,17 @@ import (
 
 type RootTestSuite struct {
 	suite.Suite
-	e *echo.Echo
+	seed      int
+	keyLength int
+	e         *echo.Echo
 }
 
 /*-------------------Setups/Teardowns-------------------*/
 
 func (suite *RootTestSuite) SetupTest() {
 	suite.e = echo.New()
+	suite.seed = 42
+	suite.keyLength = 7
 }
 
 /*-------------------Tests------------------------------*/
@@ -28,9 +35,12 @@ func (suite *RootTestSuite) TestRootRedirectsToRoom() {
 	rec := httptest.NewRecorder()
 	c := suite.e.NewContext(req, rec)
 
-	roomId := RootHandler(c)
-	if assert.NoError(suite.T(), roomId) {
-		assert.Equal(suite.T(), roomId, rec.HeaderMap.Get("Location"))
+	rand.Seed(int64(suite.seed))
+	key := utils.RandomKey(suite.keyLength)
+	rand.Seed(int64(suite.seed))
+
+	if assert.NoError(suite.T(), RootHandler(c)) {
+		assert.Equal(suite.T(), key, rec.HeaderMap.Get("Location"))
 	}
 }
 
