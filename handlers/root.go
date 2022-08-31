@@ -9,7 +9,7 @@ import (
 )
 
 func RootHandler(c echo.Context) error {
-	key := utils.RandomKey(7)
+	key := utils.RandomKey()
 	fmt.Println(key)
 	c.Redirect(http.StatusFound, fmt.Sprintf("/%s", key))
 	return nil

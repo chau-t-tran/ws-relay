@@ -25,7 +25,6 @@ type RootTestSuite struct {
 func (suite *RootTestSuite) SetupTest() {
 	suite.e = echo.New()
 	suite.seed = 42
-	suite.keyLength = 7
 }
 
 /*-------------------Tests------------------------------*/
@@ -36,7 +35,7 @@ func (suite *RootTestSuite) TestRootRedirectsToRoom() {
 	c := suite.e.NewContext(req, rec)
 
 	rand.Seed(int64(suite.seed))
-	key := "/" + utils.RandomKey(suite.keyLength)
+	key := "/" + utils.RandomKey()
 	rand.Seed(int64(suite.seed))
 
 	if assert.NoError(suite.T(), RootHandler(c)) {
