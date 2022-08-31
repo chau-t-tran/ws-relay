@@ -15,10 +15,9 @@ type RootTestSuite struct {
 /*-------------------Tests------------------------------*/
 
 func (suite *RootTestSuite) TestRandomKeysAreDifferent() {
-	n := 7
 	m := make(map[string]bool)
 	for i := 1; i < 5000; i++ {
-		key := RandomKey(n)
+		key := RandomKey()
 		fmt.Println(key)
 		_, found := m[key]
 		assert.True(suite.T(), !found, "Key collision!")

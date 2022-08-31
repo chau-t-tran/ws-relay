@@ -1,14 +1,18 @@
 package utils
 
-import "math/rand"
+import (
+	"math/rand"
 
-func RandomKey(n int) string {
-	s := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	var k []rune
+	"github.com/chau-t-tran/ws-relay/constants"
+)
 
-	for i := 0; i < n; i++ {
-		k = append(k, rune(s[rand.Intn(len(s))]))
+func RandomKey() string {
+	var key []rune
+
+	for i := 0; i < constants.KEY_SIZE; i++ {
+		key_index := rand.Intn(constants.KEY_SPACE_SIZE)
+		key = append(key, rune(constants.KEY_SPACE[key_index]))
 	}
 
-	return string(k)
+	return string(key)
 }
