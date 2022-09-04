@@ -10,5 +10,6 @@ import (
 
 func SetupRootRoutes(e *echo.Echo) {
 	e.GET("/", handlers.RootHandler)
+	e.GET("/:sessionKey", handlers.SessionHandler)
 	fmt.Println("Index routes setup!")
 }

@@ -9,8 +9,12 @@ import (
 )
 
 func RootHandler(c echo.Context) error {
-	key := utils.RandomKey()
-	fmt.Println(key)
-	c.Redirect(http.StatusFound, fmt.Sprintf("/%s", key))
+	sessionKey := utils.RandomKey()
+	c.Redirect(http.StatusFound, fmt.Sprintf("/%s", sessionKey))
 	return nil
+}
+
+func SessionHandler(c echo.Context) error {
+	sessionKey := c.Param("sessionKey")
+	return c.Render(http.StatusOK, "index.html", sessionKey)
 }
