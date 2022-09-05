@@ -16,5 +16,8 @@ func RootHandler(c echo.Context) error {
 
 func SessionHandler(c echo.Context) error {
 	sessionKey := c.Param("sessionKey")
-	return c.Render(http.StatusOK, "index.html", sessionKey)
+	return c.Render(http.StatusOK, "index.html", map[string]interface{}{
+		"sessionKey": sessionKey,
+		"host":       c.Request().Host,
+	})
 }

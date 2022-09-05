@@ -1,3 +1,23 @@
 <html>
-	<h1> Hello {{.}} </h1>
+	<head>
+		<meta name="color-scheme" content="light dark">
+		<style>
+			body {
+				font-family: 'Courier New', monospace;
+			}
+		</style>
+	</head>
+	<body>
+		<pre>
+wsrelay.me			WS-RELAY v1.0			ctran 
+
+DESCRIPTION
+	A public websocket relay server. Stream data 
+	from client-to-client without either node knowing 
+	of each other's existence.
+
+SESSION URL
+	{{index . "host"}}/{{index . "sessionKey"}}
+		</pre>
+	</body>
 <html>
