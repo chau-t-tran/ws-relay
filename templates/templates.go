@@ -15,4 +15,17 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-var Renderer *Template = &Template{templates: template.Must(template.ParseGlob("templates/*.html"))}
+func getTemplateGlob() (*template.Template, error) {
+	var tg *template.Template
+	var err error
+
+	tg, err = template.ParseGlob("templates/*.html")
+
+	if err != nil {
+		tg, err = template.ParseGlob("../templates/*.html")
+	}
+
+	return tg, err
+}
+
+var Renderer *Template = &Template{templates: template.Must(getTemplateGlob())}

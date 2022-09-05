@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/chau-t-tran/ws-relay/templates"
 	"github.com/chau-t-tran/ws-relay/utils"
 
 	"github.com/labstack/echo/v4"
@@ -25,6 +26,7 @@ type RootTestSuite struct {
 func (suite *RootTestSuite) SetupTest() {
 	suite.e = echo.New()
 	suite.seed = 42
+	suite.e.Renderer = templates.Renderer
 }
 
 /*-------------------Tests------------------------------*/
@@ -41,6 +43,17 @@ func (suite *RootTestSuite) TestRootRedirectsToRoom() {
 	if assert.NoError(suite.T(), RootHandler(c)) {
 		assert.Equal(suite.T(), key, rec.HeaderMap.Get("Location"))
 	}
+}
+
+func (suite *RootTestSuite) TestSessionHandler() {
+	rand.Seed(int64(suite.seed))
+	key := "/" + utils.RandomKey()
+
+	req := httptest.NewRequest(http.MethodGet, "/"+key, nil)
+	rec := httptest.NewRecorder()
+	c := suite.e.NewContext(req, rec)
+
+	assert.NoError(suite.T(), SessionHandler(c))
 }
 
 /*-------------------Test Runner------------------------*/
