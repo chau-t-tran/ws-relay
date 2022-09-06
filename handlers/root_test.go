@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/chau-t-tran/ws-relay/constants"
 	"github.com/chau-t-tran/ws-relay/templates"
 	"github.com/chau-t-tran/ws-relay/utils"
 
@@ -25,7 +26,7 @@ type RootTestSuite struct {
 
 func (suite *RootTestSuite) SetupTest() {
 	suite.e = echo.New()
-	suite.seed = 42
+	suite.seed = constants.KEY_TEST_SEED
 	suite.e.Renderer = templates.Renderer
 }
 
