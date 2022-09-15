@@ -1,24 +1,22 @@
 package utils
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
-type RootTestSuite struct {
+type KeyTestSuite struct {
 	suite.Suite
 }
 
-/*-------------------Tests------------------------------*/
+/*-------------------Key Tests--------------------------*/
 
-func (suite *RootTestSuite) TestRandomKeysAreDifferent() {
+func (suite *KeyTestSuite) TestRandomKeysAreDifferent() {
 	m := make(map[string]bool)
 	for i := 1; i < 5000; i++ {
 		key := RandomKey()
-		fmt.Println(key)
 		_, found := m[key]
 		assert.True(suite.T(), !found, "Key collision!")
 
@@ -32,6 +30,6 @@ func (suite *RootTestSuite) TestRandomKeysAreDifferent() {
 
 /*-------------------Test Runner------------------------*/
 
-func TestRootTestSuite(t *testing.T) {
-	suite.Run(t, new(RootTestSuite))
+func TestKeyTestSuite(t *testing.T) {
+	suite.Run(t, new(KeyTestSuite))
 }
