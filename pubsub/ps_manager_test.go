@@ -13,6 +13,7 @@ import (
 
 type WSManagerTestSuite struct {
 	suite.Suite
+	wsUrl      string
 	port       int
 	sessionKey string
 	manager    SessionManager
@@ -28,6 +29,7 @@ var (
 
 func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.port = 4000
+	suite.wsUrl = fmt.Sprintf("ws://localhost:%d", suite.port)
 	suite.sessionKey = "abcdefgh"
 	suite.manager = SessionManager{
 		Sessions: make(map[string]Session),
@@ -43,6 +45,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	go func() {
 		suite.e.Logger.Fatal(suite.e.Start(fmt.Sprintf(":%d", suite.port)))
 	}()
+
 	time.Sleep(2 * time.Second)
 }
 
@@ -50,12 +53,10 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 	// baseUrl := fmt.Sprintf("http://localhost:%d", suite.port)
-	wsUrl := fmt.Sprintf("ws://localhost:%d", suite.port)
-
 	assert.Equal(suite.T(), len(suite.manager.GetConnections(suite.sessionKey)), 0)
 
 	dialer := websocket.Dialer{}
-	_, _, err := dialer.Dial(wsUrl, nil)
+	_, _, err := dialer.Dial(suite.wsUrl, nil)
 	if err != nil {
 		panic(err)
 	}
