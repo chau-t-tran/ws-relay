@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -24,9 +26,15 @@ func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
 	}
 }
 
-/*
-func (sm *SessionManager) Broadcast(message string, conn websocket.Conn) {
-	for _, c := range sm.Sessions {
+func (sm *SessionManager) Broadcast(key string, conn *websocket.Conn, message string) {
+	for _, c := range sm.GetConnections(key) {
+		if c == conn {
+			continue
+		}
+		err := c.WriteMessage(1, []byte(message))
+		if err != nil {
+			log.Println("Error sending message")
+			continue
+		}
 	}
 }
-*/
