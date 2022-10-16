@@ -1,39 +1,33 @@
 package utils
 
 import (
-	"log"
-
 	"github.com/gorilla/websocket"
 )
 
-type Session struct {
-	Connections []*websocket.Conn
-}
-
 type SessionManager struct {
-	Sessions map[string]Session
+	sessions map[string][]*websocket.Conn
 }
 
 func (s *SessionManager) GetConnections(sessionKey string) []*websocket.Conn {
-	return s.Sessions[sessionKey].Connections
+	return s.sessions[sessionKey]
 }
 
 func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
-	if session, ok := s.Sessions[sessionKey]; ok {
-		session.Connections = append(session.Connections, ws)
+	if session, ok := s.sessions[sessionKey]; ok {
+		s.sessions[sessionKey] = append(session, ws)
 	} else {
-		s.Sessions[sessionKey] = Session{Connections: []*websocket.Conn{ws}}
+		s.sessions[sessionKey] = []*websocket.Conn{ws}
 	}
 }
 
-func (sm *SessionManager) Broadcast(key string, conn *websocket.Conn, message string) {
+func (sm *SessionManager) Broadcast(key string, senderAddr string, message string) {
 	for _, c := range sm.GetConnections(key) {
-		if c == conn {
+		receiverAddr := c.RemoteAddr().String()
+		if receiverAddr == senderAddr {
 			continue
 		}
 		err := c.WriteMessage(1, []byte(message))
 		if err != nil {
-			log.Println("Error sending message")
 			continue
 		}
 	}

@@ -19,16 +19,16 @@ type WSManagerTestSuite struct {
 	port       int
 	sessionKey string
 	manager    SessionManager
-	session    Session
+	session    []*websocket.Conn
 	e          *echo.Echo
 }
 
 type wsResponseAggregator struct {
 	mu   sync.Mutex
-	data map[*websocket.Conn]string
+	data map[string]string
 }
 
-func (w *wsResponseAggregator) GetData() map[*websocket.Conn]string {
+func (w *wsResponseAggregator) GetData() map[string]string {
 	return w.data
 }
 
@@ -41,7 +41,7 @@ func listen(conn *websocket.Conn, agg wsResponseAggregator) {
 		}
 		agg.mu.Lock()
 		defer agg.mu.Unlock()
-		agg.data[conn] = string(message)
+		agg.data[conn.LocalAddr().String()] = string(message)
 	}
 }
 
@@ -56,7 +56,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.wsUrl = fmt.Sprintf("ws://localhost:%d", suite.port)
 	suite.sessionKey = "abcdefgh"
 	suite.manager = SessionManager{
-		Sessions: make(map[string]Session),
+		sessions: map[string][]*websocket.Conn{},
 	}
 
 	suite.e = echo.New()
@@ -91,7 +91,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 
 func (suite *WSManagerTestSuite) TearDownTest() {
 	suite.manager = SessionManager{
-		Sessions: make(map[string]Session),
+		sessions: map[string][]*websocket.Conn{},
 	}
 }
 
@@ -100,7 +100,6 @@ func (suite *WSManagerTestSuite) TearDownTest() {
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 	// baseUrl := fmt.Sprintf("http://localhost:%d", suite.port)
 	originalSize := len(suite.manager.GetConnections(suite.sessionKey))
-	log.Println("original:", originalSize)
 
 	dialer := websocket.Dialer{}
 	_, _, err := dialer.Dial(suite.wsUrl, nil)
@@ -108,11 +107,10 @@ func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 		panic(err)
 	}
 
-	log.Println("after dial:", len(suite.manager.GetConnections(suite.sessionKey)))
 	assert.Equal(suite.T(), len(suite.manager.GetConnections(suite.sessionKey)), originalSize+1)
 }
 
-func (suite *WSManagerTestSuite) TestOneToOneBroadcast() {
+func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {
 	// add some connections
 	dialer1 := websocket.Dialer{}
 	conn1, _, err := dialer1.Dial(suite.wsUrl, nil)
@@ -121,16 +119,57 @@ func (suite *WSManagerTestSuite) TestOneToOneBroadcast() {
 	}
 
 	responseData := wsResponseAggregator{
-		data: map[*websocket.Conn]string{conn1: ""},
+		data: map[string]string{},
 	}
 
 	go listen(conn1, responseData)
 
-	suite.manager.Broadcast(suite.sessionKey, conn1, "hello world")
-
+	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), "hello world")
 	time.Sleep(2 * time.Second)
 
-	assert.Equal(suite.T(), responseData.GetData()[conn1], "hello world")
+	assert.Equal(suite.T(), "", responseData.GetData()[conn1.LocalAddr().String()])
+}
+
+func (suite *WSManagerTestSuite) TestOneToManyBroadcast() {
+	message := "hello world"
+
+	// add multiple connections
+	dialer1 := websocket.Dialer{}
+	conn1, _, err := dialer1.Dial(suite.wsUrl, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	dialer2 := websocket.Dialer{}
+	conn2, _, err := dialer2.Dial(suite.wsUrl, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	dialer3 := websocket.Dialer{}
+	conn3, _, err := dialer3.Dial(suite.wsUrl, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// test aggregator
+	responseData := wsResponseAggregator{
+		data: map[string]string{},
+	}
+
+	// listen on all three connections
+	go listen(conn1, responseData)
+	go listen(conn2, responseData)
+	go listen(conn3, responseData)
+
+	// test broadcast
+	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), message)
+	time.Sleep(5 * time.Second)
+
+	log.Println("TEST:", responseData.GetData())
+
+	assert.Equal(suite.T(), message, responseData.GetData()[conn2.LocalAddr().String()])
+	assert.Equal(suite.T(), message, responseData.GetData()[conn3.LocalAddr().String()])
 }
 
 /*-------------------Test Runner------------------------*/
