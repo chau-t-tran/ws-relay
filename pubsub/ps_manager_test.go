@@ -54,35 +54,16 @@ var (
 
 func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.port = 4000
-	suite.wsUrl = fmt.Sprintf("ws://localhost:%d", suite.port)
 	suite.sessionKey = "abcdefgh"
+	suite.wsUrl = fmt.Sprintf("ws://localhost:%d/%s", suite.port, suite.sessionKey)
+	log.Println(suite.wsUrl)
 	suite.testMessage = "hello world"
 	suite.manager = SessionManager{
 		sessions: map[string][]*websocket.Conn{},
 	}
 
 	suite.e = echo.New()
-	suite.e.GET("/", func(c echo.Context) error {
-		conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-		if err != nil {
-			log.Println("upgrade error:", err)
-			return err
-		}
-		defer conn.Close()
-		suite.manager.AddConnection(suite.sessionKey, conn)
-		for {
-			mt, message, err := conn.ReadMessage()
-			if err != nil {
-				break
-			}
-			formattedMessage := fmt.Sprintf("message: %s", message)
-			err = conn.WriteMessage(mt, []byte(formattedMessage))
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	suite.e.GET("/:sessionKey", suite.manager.EchoHandler)
 
 	go func() {
 		suite.e.Logger.Fatal(suite.e.Start(fmt.Sprintf(":%d", suite.port)))

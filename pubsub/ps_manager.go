@@ -1,7 +1,10 @@
 package ps_manager
 
 import (
+	"log"
+
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
 )
 
 type SessionManager struct {
@@ -33,6 +36,25 @@ func (sm *SessionManager) Broadcast(key string, senderAddr string, message strin
 	}
 }
 
-var (
-	Manager = SessionManager{}
-)
+func (sm *SessionManager) EchoHandler(c echo.Context) error {
+	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	sessionKey := c.Param("sessionKey")
+	if err != nil {
+		log.Println("upgrade error:", err)
+		return err
+	}
+	defer conn.Close()
+	sm.AddConnection(sessionKey, conn)
+	for {
+
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+		err = conn.WriteMessage(mt, []byte(message))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
