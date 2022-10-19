@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 type SessionManager struct {
 	sessions map[string][]*websocket.Conn
 }

@@ -48,10 +48,6 @@ func listen(conn *websocket.Conn, agg wsResponseAggregator) {
 
 /*-------------------Setups/Teardowns-------------------*/
 
-var (
-	upgrader = websocket.Upgrader{}
-)
-
 func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.port = 4000
 	suite.sessionKey = "abcdefgh"
