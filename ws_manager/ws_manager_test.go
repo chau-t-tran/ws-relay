@@ -1,4 +1,4 @@
-package ps_manager
+package ws_manager
 
 import (
 	"fmt"
