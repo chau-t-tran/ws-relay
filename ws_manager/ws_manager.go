@@ -11,6 +11,13 @@ type SessionManager struct {
 	sessions map[string][]*websocket.Conn
 }
 
+func CreateSessionManager() SessionManager {
+	sm := SessionManager{
+		sessions: map[string][]*websocket.Conn{},
+	}
+	return sm
+}
+
 func (s *SessionManager) GetConnections(sessionKey string) []*websocket.Conn {
 	return s.sessions[sessionKey]
 }

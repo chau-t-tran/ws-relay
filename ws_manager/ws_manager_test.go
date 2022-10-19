@@ -56,11 +56,8 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.port = 4000
 	suite.sessionKey = "abcdefgh"
 	suite.wsUrl = fmt.Sprintf("ws://localhost:%d/%s", suite.port, suite.sessionKey)
-	log.Println(suite.wsUrl)
 	suite.testMessage = "hello world"
-	suite.manager = SessionManager{
-		sessions: map[string][]*websocket.Conn{},
-	}
+	suite.manager = CreateSessionManager()
 
 	suite.e = echo.New()
 	suite.e.GET("/:sessionKey", suite.manager.EchoHandler)
@@ -73,9 +70,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 }
 
 func (suite *WSManagerTestSuite) TearDownTest() {
-	suite.manager = SessionManager{
-		sessions: map[string][]*websocket.Conn{},
-	}
+	suite.manager = CreateSessionManager()
 }
 
 /*-------------------Tests------------------------------*/
