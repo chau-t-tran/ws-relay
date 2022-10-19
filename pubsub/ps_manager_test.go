@@ -1,4 +1,4 @@
-package utils
+package ps_manager
 
 import (
 	"fmt"
@@ -15,12 +15,13 @@ import (
 
 type WSManagerTestSuite struct {
 	suite.Suite
-	wsUrl      string
-	port       int
-	sessionKey string
-	manager    SessionManager
-	session    []*websocket.Conn
-	e          *echo.Echo
+	wsUrl       string
+	port        int
+	sessionKey  string
+	manager     SessionManager
+	session     []*websocket.Conn
+	e           *echo.Echo
+	testMessage string
 }
 
 type wsResponseAggregator struct {
@@ -55,6 +56,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.port = 4000
 	suite.wsUrl = fmt.Sprintf("ws://localhost:%d", suite.port)
 	suite.sessionKey = "abcdefgh"
+	suite.testMessage = "hello world"
 	suite.manager = SessionManager{
 		sessions: map[string][]*websocket.Conn{},
 	}
@@ -124,15 +126,13 @@ func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {
 
 	go listen(conn1, responseData)
 
-	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), "hello world")
+	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
 	time.Sleep(2 * time.Second)
 
 	assert.Equal(suite.T(), "", responseData.GetData()[conn1.LocalAddr().String()])
 }
 
 func (suite *WSManagerTestSuite) TestOneToManyBroadcast() {
-	message := "hello world"
-
 	// add multiple connections
 	dialer1 := websocket.Dialer{}
 	conn1, _, err := dialer1.Dial(suite.wsUrl, nil)
@@ -163,13 +163,13 @@ func (suite *WSManagerTestSuite) TestOneToManyBroadcast() {
 	go listen(conn3, responseData)
 
 	// test broadcast
-	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), message)
+	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
 	time.Sleep(5 * time.Second)
 
-	log.Println("TEST:", responseData.GetData())
+	log.Println("RESPONSES:", responseData.GetData())
 
-	assert.Equal(suite.T(), message, responseData.GetData()[conn2.LocalAddr().String()])
-	assert.Equal(suite.T(), message, responseData.GetData()[conn3.LocalAddr().String()])
+	assert.Equal(suite.T(), suite.testMessage, responseData.GetData()[conn2.LocalAddr().String()])
+	assert.Equal(suite.T(), suite.testMessage, responseData.GetData()[conn3.LocalAddr().String()])
 }
 
 /*-------------------Test Runner------------------------*/

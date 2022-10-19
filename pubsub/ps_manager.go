@@ -1,4 +1,4 @@
-package utils
+package ps_manager
 
 import (
 	"github.com/gorilla/websocket"
@@ -32,3 +32,7 @@ func (sm *SessionManager) Broadcast(key string, senderAddr string, message strin
 		}
 	}
 }
+
+var (
+	Manager = SessionManager{}
+)
