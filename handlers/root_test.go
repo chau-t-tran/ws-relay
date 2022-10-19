@@ -32,21 +32,7 @@ func (suite *RootTestSuite) SetupTest() {
 
 /*-------------------Tests------------------------------*/
 
-func (suite *RootTestSuite) TestRootRedirectsToRoom() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	c := suite.e.NewContext(req, rec)
-
-	rand.Seed(int64(suite.seed))
-	key := "/" + utils.RandomKey()
-	rand.Seed(int64(suite.seed))
-
-	if assert.NoError(suite.T(), RootHandler(c)) {
-		assert.Equal(suite.T(), key, rec.HeaderMap.Get("Location"))
-	}
-}
-
-func (suite *RootTestSuite) TestSessionHandler() {
+func (suite *RootTestSuite) TestRootHandler() {
 	rand.Seed(int64(suite.seed))
 	key := "/" + utils.RandomKey()
 
@@ -54,7 +40,7 @@ func (suite *RootTestSuite) TestSessionHandler() {
 	rec := httptest.NewRecorder()
 	c := suite.e.NewContext(req, rec)
 
-	assert.NoError(suite.T(), SessionHandler(c))
+	assert.NoError(suite.T(), RootHandler(c))
 }
 
 /*-------------------Test Runner------------------------*/
