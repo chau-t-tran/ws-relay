@@ -24,6 +24,7 @@ func GetServer() *echo.Echo {
 
 	/* ----------Routes---------- */
 	routes.SetupRootRoutes(e)
+	routes.SetupWSRoutes(e)
 
 	return e
 }
