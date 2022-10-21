@@ -98,7 +98,8 @@ func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {
 
 	go listen(conn1, responseData)
 
-	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
+	conn1.WriteMessage(1, []byte(suite.testMessage))
+	// suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
 	time.Sleep(2 * time.Second)
 
 	assert.Equal(suite.T(), "", responseData.GetData()[conn1.LocalAddr().String()])
@@ -135,8 +136,9 @@ func (suite *WSManagerTestSuite) TestOneToManyBroadcast() {
 	go listen(conn3, responseData)
 
 	// test broadcast
-	suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
-	time.Sleep(5 * time.Second)
+	conn1.WriteMessage(1, []byte(suite.testMessage))
+	//suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
+	time.Sleep(2 * time.Second)
 
 	log.Println("RESPONSES:", responseData.GetData())
 

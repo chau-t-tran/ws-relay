@@ -2,14 +2,20 @@ package ws_manager
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 )
 
+func CheckOrigin(r *http.Request) bool {
+	return true
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     CheckOrigin,
 }
 
 type SessionManager struct {
@@ -35,17 +41,18 @@ func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
 	}
 }
 
-func (sm *SessionManager) Broadcast(key string, senderAddr string, message string) {
+func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byte) error {
 	for _, c := range sm.GetConnections(key) {
 		receiverAddr := c.RemoteAddr().String()
 		if receiverAddr == senderAddr {
 			continue
 		}
-		err := c.WriteMessage(1, []byte(message))
+		err := c.WriteMessage(1, message)
 		if err != nil {
-			continue
+			return err
 		}
 	}
+	return nil
 }
 
 func (sm *SessionManager) EchoHandler(c echo.Context) error {
@@ -57,13 +64,13 @@ func (sm *SessionManager) EchoHandler(c echo.Context) error {
 	}
 	defer conn.Close()
 	sm.AddConnection(sessionKey, conn)
+	log.Println("Added to", sessionKey)
 	for {
-
-		mt, message, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		err = conn.WriteMessage(mt, []byte(message))
+		err = sm.Broadcast(sessionKey, conn.RemoteAddr().String(), message)
 		if err != nil {
 			return err
 		}
