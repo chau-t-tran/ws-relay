@@ -82,8 +82,25 @@ func (suite *WSManagerTestSuite) TestSessionManagerConstructor() {
 	assert.NoError(suite.T(), err2)
 }
 
+func (suite *WSManagerTestSuite) TestClientNotAddedIfSessionNotRegistered() {
+	dialer := websocket.Dialer{}
+	_, _, err := dialer.Dial(suite.wsUrl, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = suite.manager.GetSession(suite.sessionKey)
+	assert.EqualError(
+		suite.T(),
+		err,
+		fmt.Sprintf("Session %s not found", suite.sessionKey),
+	)
+}
+
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
-	// baseUrl := fmt.Sprintf("http://localhost:%d", suite.port)
+	err := suite.manager.RegisterSession(suite.sessionKey)
+	assert.NoError(suite.T(), err)
+
 	session, err := suite.manager.GetSession(suite.sessionKey)
 	originalSize := len(session)
 
@@ -99,7 +116,9 @@ func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 }
 
 func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {
-	// add some connections
+	err := suite.manager.RegisterSession(suite.sessionKey)
+	assert.NoError(suite.T(), err)
+
 	dialer1 := websocket.Dialer{}
 	conn1, _, err := dialer1.Dial(suite.wsUrl, nil)
 	if err != nil {
@@ -113,13 +132,15 @@ func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {
 	go listen(conn1, responseData)
 
 	conn1.WriteMessage(1, []byte(suite.testMessage))
-	// suite.manager.Broadcast(suite.sessionKey, conn1.LocalAddr().String(), suite.testMessage)
 	time.Sleep(2 * time.Second)
 
 	assert.Equal(suite.T(), "", responseData.GetData()[conn1.LocalAddr().String()])
 }
 
 func (suite *WSManagerTestSuite) TestOneToManyBroadcast() {
+	err := suite.manager.RegisterSession(suite.sessionKey)
+	assert.NoError(suite.T(), err)
+
 	// add multiple connections
 	dialer1 := websocket.Dialer{}
 	conn1, _, err := dialer1.Dial(suite.wsUrl, nil)
