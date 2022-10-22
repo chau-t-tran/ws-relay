@@ -10,6 +10,19 @@ function displayMessage(message) {
 	messages.appendChild(newMessage);
 }
 
+async function createRoom() {
+	let response = await fetch("http://localhost:5000/register", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({}),
+    });
+	let responseJSON = await response.json()
+	console.log(responseJSON)
+	subscribeToRoom(responseJSON.sessionKey)
+}
+
 function subscribeToRoom(key) {
 	socket = new WebSocket(`ws://localhost:5000/${key}`);
 	socket.addEventListener('message', (e) => {
@@ -34,7 +47,7 @@ function handleCommand(e) {
 	const op = tokens[0];
 
 	if (op !== "/join") return sendMessage(text);
-	if (tokens.length < 2) return;
+	if (tokens.length < 2) return createRoom();
 
 	subscribeToRoom(tokens[1]);
 }
