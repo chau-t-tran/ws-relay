@@ -7,10 +7,15 @@ import (
 
 	"github.com/chau-t-tran/ws-relay/templates"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func GetServer() *echo.Echo {
 	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	/* ------Pseudorand Seed----- */
 	rand.Seed(int64(time.Now().UTC().UnixNano()))
