@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chau-t-tran/ws-relay/routes"
 	"github.com/chau-t-tran/ws-relay/templates"
 	"github.com/labstack/echo/v4"
 )
@@ -23,8 +22,7 @@ func GetServer() *echo.Echo {
 	})
 
 	/* ----------Routes---------- */
-	routes.SetupRootRoutes(e)
-	routes.SetupWSRoutes(e)
+	SetupWSRoutes(e)
 
 	return e
 }

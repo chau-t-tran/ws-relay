@@ -1,4 +1,4 @@
-package routes
+package server
 
 import (
 	"fmt"
@@ -8,7 +8,9 @@ import (
 )
 
 func SetupWSRoutes(e *echo.Echo) {
-	sm := ws_manager.CreateSessionManager()
+	sm := ws_manager.CreateSessionManager([]string{})
+	e.GET("/", sm.RootHandler)
 	e.GET("/:sessionKey", sm.EchoHandler)
+	e.POST("/register", sm.RegisterHandler)
 	fmt.Println("WS routes setup!")
 }
