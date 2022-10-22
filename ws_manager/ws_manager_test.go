@@ -78,8 +78,8 @@ func (suite *WSManagerTestSuite) TestSessionManagerConstructor() {
 	sm := CreateSessionManager(keys)
 	_, err1 := sm.GetSession(key1)
 	_, err2 := sm.GetSession(key2)
-	assert.Nil(suite.T(), err1)
-	assert.Nil(suite.T(), err2)
+	assert.NoError(suite.T(), err1)
+	assert.NoError(suite.T(), err2)
 }
 
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
