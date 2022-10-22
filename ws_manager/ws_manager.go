@@ -44,11 +44,26 @@ func (s *SessionManager) GetSession(sessionKey string) ([]*websocket.Conn, error
 	return session, nil
 }
 
-func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
+func (s *SessionManager) RegisterSession(sessionKey string) error {
+	_, err := s.GetSession(sessionKey)
+	if err == nil {
+		return errors.New(
+			fmt.Sprintf("Session %s already exists", sessionKey),
+		)
+	}
+
+	s.sessions[sessionKey] = []*websocket.Conn{}
+	return nil
+}
+
+func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) error {
 	if session, ok := s.sessions[sessionKey]; ok {
 		s.sessions[sessionKey] = append(session, ws)
+		return nil
 	} else {
-		s.sessions[sessionKey] = []*websocket.Conn{ws}
+		return errors.New(
+			fmt.Sprintf("Session %s does not exist", sessionKey),
+		)
 	}
 }
 
