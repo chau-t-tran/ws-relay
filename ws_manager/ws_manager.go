@@ -3,11 +3,9 @@ package ws_manager
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/labstack/echo/v4"
 )
 
 func CheckOrigin(r *http.Request) bool {
@@ -79,31 +77,6 @@ func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byt
 			continue
 		}
 		err := c.WriteMessage(1, message)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// handlers
-
-func (sm *SessionManager) EchoHandler(c echo.Context) error {
-	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-	sessionKey := c.Param("sessionKey")
-	if err != nil {
-		log.Println("upgrade error:", err)
-		return err
-	}
-	defer conn.Close()
-	sm.AddConnection(sessionKey, conn)
-	log.Println("Added to", sessionKey)
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-		err = sm.Broadcast(sessionKey, conn.RemoteAddr().String(), message)
 		if err != nil {
 			return err
 		}
