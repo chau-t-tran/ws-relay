@@ -53,7 +53,7 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.sessionKey = "abcdefgh"
 	suite.wsUrl = fmt.Sprintf("ws://localhost:%d/%s", suite.port, suite.sessionKey)
 	suite.testMessage = "hello world"
-	suite.manager = CreateSessionManager()
+	suite.manager = CreateSessionManager([]string{})
 
 	suite.e = echo.New()
 	suite.e.GET("/:sessionKey", suite.manager.EchoHandler)
@@ -66,22 +66,36 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 }
 
 func (suite *WSManagerTestSuite) TearDownTest() {
-	suite.manager = CreateSessionManager()
+	suite.manager = CreateSessionManager([]string{})
 }
 
 /*-------------------Tests------------------------------*/
 
+func (suite *WSManagerTestSuite) TestSessionManagerConstructor() {
+	key1 := "abcdefgh"
+	key2 := "ijklmnop"
+	keys := []string{key1, key2}
+	sm := CreateSessionManager(keys)
+	_, err1 := sm.GetSession(key1)
+	_, err2 := sm.GetSession(key2)
+	assert.Nil(suite.T(), err1)
+	assert.Nil(suite.T(), err2)
+}
+
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 	// baseUrl := fmt.Sprintf("http://localhost:%d", suite.port)
-	originalSize := len(suite.manager.GetSession(suite.sessionKey))
+	session, err := suite.manager.GetSession(suite.sessionKey)
+	originalSize := len(session)
 
 	dialer := websocket.Dialer{}
-	_, _, err := dialer.Dial(suite.wsUrl, nil)
+	_, _, err = dialer.Dial(suite.wsUrl, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	assert.Equal(suite.T(), len(suite.manager.GetSession(suite.sessionKey)), originalSize+1)
+	updatedSession, err := suite.manager.GetSession(suite.sessionKey)
+	updatedSize := len(updatedSession)
+	assert.Equal(suite.T(), updatedSize, originalSize+1)
 }
 
 func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {

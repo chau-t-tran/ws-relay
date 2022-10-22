@@ -1,6 +1,8 @@
 package ws_manager
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -22,15 +24,24 @@ type SessionManager struct {
 	sessions map[string][]*websocket.Conn
 }
 
-func CreateSessionManager() SessionManager {
+func CreateSessionManager(sessionKeys []string) SessionManager {
 	sm := SessionManager{
 		sessions: map[string][]*websocket.Conn{},
+	}
+	for _, key := range sessionKeys {
+		sm.sessions[key] = []*websocket.Conn{}
 	}
 	return sm
 }
 
-func (s *SessionManager) GetSession(sessionKey string) []*websocket.Conn {
-	return s.sessions[sessionKey]
+func (s *SessionManager) GetSession(sessionKey string) ([]*websocket.Conn, error) {
+	session, ok := s.sessions[sessionKey]
+	if !ok {
+		return session, errors.New(
+			fmt.Sprintf("Session %s not found", sessionKey),
+		)
+	}
+	return session, nil
 }
 
 func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
@@ -42,7 +53,12 @@ func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
 }
 
 func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byte) error {
-	for _, c := range sm.GetSession(key) {
+	session, err := sm.GetSession(key)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range session {
 		receiverAddr := c.RemoteAddr().String()
 		if receiverAddr == senderAddr {
 			continue
