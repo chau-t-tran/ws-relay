@@ -73,7 +73,7 @@ func (suite *WSManagerTestSuite) TearDownTest() {
 
 func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 	// baseUrl := fmt.Sprintf("http://localhost:%d", suite.port)
-	originalSize := len(suite.manager.GetConnections(suite.sessionKey))
+	originalSize := len(suite.manager.GetSession(suite.sessionKey))
 
 	dialer := websocket.Dialer{}
 	_, _, err := dialer.Dial(suite.wsUrl, nil)
@@ -81,7 +81,7 @@ func (suite *WSManagerTestSuite) TestClientsGetAdded() {
 		panic(err)
 	}
 
-	assert.Equal(suite.T(), len(suite.manager.GetConnections(suite.sessionKey)), originalSize+1)
+	assert.Equal(suite.T(), len(suite.manager.GetSession(suite.sessionKey)), originalSize+1)
 }
 
 func (suite *WSManagerTestSuite) TestDoesNotBroadcastToSelf() {

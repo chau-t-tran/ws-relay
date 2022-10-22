@@ -29,7 +29,7 @@ func CreateSessionManager() SessionManager {
 	return sm
 }
 
-func (s *SessionManager) GetConnections(sessionKey string) []*websocket.Conn {
+func (s *SessionManager) GetSession(sessionKey string) []*websocket.Conn {
 	return s.sessions[sessionKey]
 }
 
@@ -42,7 +42,7 @@ func (s *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) {
 }
 
 func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byte) error {
-	for _, c := range sm.GetConnections(key) {
+	for _, c := range sm.GetSession(key) {
 		receiverAddr := c.RemoteAddr().String()
 		if receiverAddr == senderAddr {
 			continue
