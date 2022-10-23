@@ -1,6 +1,7 @@
 package ws_manager
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -59,10 +60,18 @@ func (suite *WSManagerTestSuite) SetupSuite() {
 	suite.e.GET("/:sessionKey", suite.manager.EchoHandler)
 
 	go func() {
-		suite.e.Logger.Fatal(suite.e.Start(fmt.Sprintf(":%d", suite.port)))
+		suite.e.Start(fmt.Sprintf(":%d", suite.port))
 	}()
 
 	time.Sleep(2 * time.Second)
+}
+
+func (suite *WSManagerTestSuite) TearDownSuite() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := suite.e.Shutdown(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func (suite *WSManagerTestSuite) TearDownTest() {
