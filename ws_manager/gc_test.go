@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -47,17 +46,24 @@ func (suite *GCTestSuite) SetupTest() {
 
 /*-------------------Tests------------------------------*/
 
-func (suite *GCTestSuite) TestLastUsedUpdate() {
+func (suite *GCTestSuite) TestLastUsedInitiates() {
 	suite.manager.RegisterSession(suite.sessionKey)
 
-	dialer := websocket.Dialer{}
-	_, _, err := dialer.Dial(suite.wsUrl, nil)
-	if err != nil {
-		panic(err)
-	}
-
 	currentTimeString := time.Now().Format(suite.timeFormat)
+
+	lastUsedTime, err := suite.manager.GetLastUsedTime(suite.sessionKey)
+	lastUsedTimeString := lastUsedTime.Format(suite.timeFormat)
 	assert.NoError(suite.T(), err)
+
+	assert.Equal(suite.T(), currentTimeString, lastUsedTimeString)
+}
+
+func (suite *GCTestSuite) TestLastUsedUpdatesOnBroadcast() {
+	suite.manager.RegisterSession(suite.sessionKey)
+	time.Sleep(2)
+
+	suite.manager.Broadcast(suite.sessionKey, "", []byte{})
+	currentTimeString := time.Now().Format(suite.timeFormat)
 
 	lastUsedTime, err := suite.manager.GetLastUsedTime(suite.sessionKey)
 	lastUsedTimeString := lastUsedTime.Format(suite.timeFormat)
