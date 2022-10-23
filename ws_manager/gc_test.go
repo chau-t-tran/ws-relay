@@ -48,17 +48,21 @@ func (suite *GCTestSuite) SetupTest() {
 /*-------------------Tests------------------------------*/
 
 func (suite *GCTestSuite) TestLastUsedUpdate() {
+	suite.manager.RegisterSession(suite.sessionKey)
+
 	dialer := websocket.Dialer{}
 	_, _, err := dialer.Dial(suite.wsUrl, nil)
 	if err != nil {
 		panic(err)
 	}
+
 	currentTimeString := time.Now().Format(suite.timeFormat)
 	assert.NoError(suite.T(), err)
 
 	lastUsedTime, err := suite.manager.GetLastUsedTime(suite.sessionKey)
 	lastUsedTimeString := lastUsedTime.Format(suite.timeFormat)
 	assert.NoError(suite.T(), err)
+
 	assert.Equal(suite.T(), currentTimeString, lastUsedTimeString)
 }
 

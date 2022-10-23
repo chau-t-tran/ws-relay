@@ -27,9 +27,11 @@ type SessionManager struct {
 func CreateSessionManager(sessionKeys []string) SessionManager {
 	sm := SessionManager{
 		sessions: map[string][]*websocket.Conn{},
+		lastUsed: map[string]time.Time{},
 	}
 	for _, key := range sessionKeys {
 		sm.sessions[key] = []*websocket.Conn{}
+		sm.lastUsed[key] = time.Now()
 	}
 	return sm
 }
@@ -61,8 +63,15 @@ func (sm *SessionManager) RegisterSession(sessionKey string) error {
 			fmt.Sprintf("Session %s already exists", sessionKey),
 		)
 	}
-
 	sm.sessions[sessionKey] = []*websocket.Conn{}
+
+	_, err = sm.GetLastUsedTime(sessionKey)
+	if err == nil {
+		return errors.New(
+			fmt.Sprintf("Session %s last used time already exists", sessionKey),
+		)
+	}
+	sm.lastUsed[sessionKey] = time.Now()
 	return nil
 }
 
