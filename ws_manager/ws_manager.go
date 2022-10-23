@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -20,6 +21,7 @@ var upgrader = websocket.Upgrader{
 
 type SessionManager struct {
 	sessions map[string][]*websocket.Conn
+	lastUsed map[string]time.Time
 }
 
 func CreateSessionManager(sessionKeys []string) SessionManager {
@@ -40,6 +42,16 @@ func (sm *SessionManager) GetSession(sessionKey string) ([]*websocket.Conn, erro
 		)
 	}
 	return session, nil
+}
+
+func (sm *SessionManager) GetLastUsedTime(sessionKey string) (time.Time, error) {
+	time, ok := sm.lastUsed[sessionKey]
+	if !ok {
+		return time, errors.New(
+			fmt.Sprintf("Session %s last used time not found", sessionKey),
+		)
+	}
+	return time, nil
 }
 
 func (sm *SessionManager) RegisterSession(sessionKey string) error {
