@@ -10,7 +10,6 @@ import (
 	"github.com/chau-t-tran/ws-relay/constants"
 	"github.com/chau-t-tran/ws-relay/templates"
 	"github.com/chau-t-tran/ws-relay/utils"
-	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 
 	"github.com/stretchr/testify/assert"
@@ -34,9 +33,7 @@ func (suite *HandlersTestSuite) SetupTest() {
 	rand.Seed(int64(suite.seed))
 	suite.sessionKeyJSON = fmt.Sprintf(`{"sessionKey":"%s"}`, key)
 
-	suite.manager = SessionManager{
-		map[string][]*websocket.Conn{},
-	}
+	suite.manager = CreateSessionManager([]string{})
 
 	suite.e = echo.New()
 	suite.e.Renderer = templates.Renderer
