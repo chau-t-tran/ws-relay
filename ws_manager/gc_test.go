@@ -1,6 +1,7 @@
 package ws_manager
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -24,24 +25,29 @@ type GCTestSuite struct {
 /*-------------------Setups/Teardowns-------------------*/
 
 func (suite *GCTestSuite) SetupSuite() {
-	suite.timeFormat = "02 Jan 06 15:04 MST"
+	suite.timeFormat = "02 Jan 06 15:04:05 MST"
 	suite.sessionKey = "abcdefgh"
 
-	suite.port = 9000
+	suite.wsUrl = fmt.Sprintf("ws://localhost:%d/%s", suite.port, suite.sessionKey)
+	suite.port = 4000
 	suite.e = echo.New()
 	suite.e.GET("/:sessionKey", suite.manager.EchoHandler)
 	go func() {
-		suite.e.Logger.Fatal(
-			suite.e.Start(fmt.Sprintf(":%d", suite.port)),
-		)
+		suite.e.Start(fmt.Sprintf(":%d", suite.port))
 	}()
 	time.Sleep(2 * time.Second)
-
-	suite.wsUrl = fmt.Sprintf("ws://localhost:%d/%s", suite.port, suite.sessionKey)
 }
 
 func (suite *GCTestSuite) SetupTest() {
 	suite.manager = CreateSessionManager([]string{})
+}
+
+func (suite *GCTestSuite) TearDownSuite() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := suite.e.Shutdown(ctx); err != nil {
+		panic(err)
+	}
 }
 
 /*-------------------Tests------------------------------*/
@@ -60,7 +66,10 @@ func (suite *GCTestSuite) TestLastUsedInitiates() {
 
 func (suite *GCTestSuite) TestLastUsedUpdatesOnBroadcast() {
 	suite.manager.RegisterSession(suite.sessionKey)
-	time.Sleep(2)
+	registrationTime, err := suite.manager.GetLastUsedTime(suite.sessionKey)
+	registrationTimeString := registrationTime.Format(suite.timeFormat)
+
+	time.Sleep(2 * time.Second)
 
 	suite.manager.Broadcast(suite.sessionKey, "", []byte{})
 	currentTimeString := time.Now().Format(suite.timeFormat)
@@ -69,6 +78,7 @@ func (suite *GCTestSuite) TestLastUsedUpdatesOnBroadcast() {
 	lastUsedTimeString := lastUsedTime.Format(suite.timeFormat)
 	assert.NoError(suite.T(), err)
 
+	assert.NotEqual(suite.T(), lastUsedTimeString, registrationTimeString)
 	assert.Equal(suite.T(), currentTimeString, lastUsedTimeString)
 }
 

@@ -86,8 +86,8 @@ func (sm *SessionManager) AddConnection(sessionKey string, ws *websocket.Conn) e
 	}
 }
 
-func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byte) error {
-	session, err := sm.GetSession(key)
+func (sm *SessionManager) Broadcast(sessionKey string, senderAddr string, message []byte) error {
+	session, err := sm.GetSession(sessionKey)
 	if err != nil {
 		return err
 	}
@@ -102,5 +102,7 @@ func (sm *SessionManager) Broadcast(key string, senderAddr string, message []byt
 			return err
 		}
 	}
+
+	sm.lastUsed[sessionKey] = time.Now()
 	return nil
 }
