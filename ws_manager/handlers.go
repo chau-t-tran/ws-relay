@@ -45,7 +45,6 @@ func (sm *SessionManager) EchoHandler(c echo.Context) error {
 	}
 	defer conn.Close()
 	sm.AddConnection(sessionKey, conn)
-	log.Println("Added to", sessionKey)
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
