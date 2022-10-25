@@ -3,6 +3,7 @@ package ws_manager
 import (
 	"context"
 	"fmt"
+	"log"
 	"testing"
 	"time"
 
@@ -38,16 +39,23 @@ func (suite *GCTestSuite) SetupSuite() {
 	time.Sleep(2 * time.Second)
 }
 
-func (suite *GCTestSuite) SetupTest() {
-	suite.manager = CreateSessionManager([]string{})
-}
-
 func (suite *GCTestSuite) TearDownSuite() {
+	suite.manager.cronScheduler.Stop()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := suite.e.Shutdown(ctx); err != nil {
 		panic(err)
 	}
+}
+
+func (suite *GCTestSuite) SetupTest() {
+	log.Println("NEW SESSION")
+	suite.manager = CreateSessionManager([]string{})
+}
+
+func (suite *GCTestSuite) TearDownTest() {
+	log.Println("DESTROYING OLD SESSION")
+	suite.manager.cronScheduler.Stop()
 }
 
 /*-------------------Tests------------------------------*/
@@ -69,7 +77,7 @@ func (suite *GCTestSuite) TestLastUsedUpdatesOnBroadcast() {
 	registrationTime, err := suite.manager.GetLastUsedTime(suite.sessionKey)
 	registrationTimeString := registrationTime.Format(suite.timeFormat)
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	suite.manager.Broadcast(suite.sessionKey, "", []byte{})
 	currentTimeString := time.Now().Format(suite.timeFormat)
@@ -82,8 +90,42 @@ func (suite *GCTestSuite) TestLastUsedUpdatesOnBroadcast() {
 	assert.Equal(suite.T(), currentTimeString, lastUsedTimeString)
 }
 
+func (suite *GCTestSuite) TestSessionGetsDeletedAfterOneDay() {
+	suite.manager.cronScheduler.Stop()
+	suite.manager.cronScheduler.Clear()
+	_, _ = suite.manager.cronScheduler.
+		// Every(1).
+		// Day().
+		Every(2).
+		Seconds().
+		Do(suite.manager.GarbageCollectDaily)
+	suite.manager.cronScheduler.StartAsync()
+
+	suite.manager.RegisterSession(suite.sessionKey)
+
+	_, err := suite.manager.GetSession(suite.sessionKey)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.manager.GetLastUsedTime(suite.sessionKey)
+	assert.NoError(suite.T(), err)
+
+	time.Sleep(5 * time.Second) // simulate some amount of time
+
+	_, err = suite.manager.GetSession(suite.sessionKey)
+	expectedSessionErrorMessage := fmt.Sprintf("Session %s not found", suite.sessionKey)
+	assert.Error(suite.T(), err, expectedSessionErrorMessage)
+
+	_, err = suite.manager.GetLastUsedTime(suite.sessionKey)
+	expectedTimeErrorMessage := fmt.Sprintf("Session %s last used time not found", suite.sessionKey)
+	assert.Error(suite.T(), err, expectedTimeErrorMessage)
+
+	// clean-up
+	// suite.manager.cronScheduler.Stop()
+}
+
 /*-------------------Test Runner------------------------*/
 
 func TestGCTestSuite(t *testing.T) {
+	log.Println("GC TEST")
 	suite.Run(t, new(GCTestSuite))
 }
