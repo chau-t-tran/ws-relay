@@ -3,7 +3,7 @@ package server
 import (
 	"fmt"
 
-	"github.com/chau-t-tran/ws-relay/ws_manager"
+	"github.com/chau-t-tran/ws-to-me/ws_manager"
 	"github.com/labstack/echo/v4"
 )
 

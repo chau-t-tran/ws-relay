@@ -3,7 +3,7 @@ package utils
 import (
 	"math/rand"
 
-	"github.com/chau-t-tran/ws-relay/constants"
+	"github.com/chau-t-tran/ws-to-me/constants"
 )
 
 func RandomKey() string {

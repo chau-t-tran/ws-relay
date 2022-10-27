@@ -1,6 +1,6 @@
 package main
 
-import "github.com/chau-t-tran/ws-relay/server"
+import "github.com/chau-t-tran/ws-to-me/server"
 
 func main() {
 	e := server.GetServer()

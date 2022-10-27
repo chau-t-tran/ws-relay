@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chau-t-tran/ws-relay/constants"
-	"github.com/chau-t-tran/ws-relay/utils"
-	"github.com/chau-t-tran/ws-relay/ws_manager"
+	"github.com/chau-t-tran/ws-to-me/constants"
+	"github.com/chau-t-tran/ws-to-me/utils"
+	"github.com/chau-t-tran/ws-to-me/ws_manager"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"

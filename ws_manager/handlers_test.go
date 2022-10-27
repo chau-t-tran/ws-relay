@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/chau-t-tran/ws-relay/constants"
-	"github.com/chau-t-tran/ws-relay/templates"
-	"github.com/chau-t-tran/ws-relay/utils"
+	"github.com/chau-t-tran/ws-to-me/constants"
+	"github.com/chau-t-tran/ws-to-me/templates"
+	"github.com/chau-t-tran/ws-to-me/utils"
 	"github.com/labstack/echo/v4"
 
 	"github.com/stretchr/testify/assert"

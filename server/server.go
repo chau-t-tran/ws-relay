@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/chau-t-tran/ws-relay/templates"
+	"github.com/chau-t-tran/ws-to-me/templates"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

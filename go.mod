@@ -1,4 +1,4 @@
-module github.com/chau-t-tran/ws-relay
+module github.com/chau-t-tran/ws-to-me
 
 go 1.18
 
