@@ -9,15 +9,32 @@
 	</head>
 	<body>
 		<pre>
-wsrelay.me			WS-RELAY v1.0			ctran 
+ws-to.me			WS-TO-ME v1.0			ctran 
 
 DESCRIPTION
 	A public websocket relay server. Stream data 
 	from client-to-client without either node knowing 
-	of each other's existence.
+	of each other's existence with plain JS websockets.
+	
+	Thank you <a href="https://pipeto.me/">pipe-to-me</a> for the inspiration.
 
 SESSION URL
-	{{index . "host"}}/{{index . "sessionKey"}}
+	ws://{{index . "host"}}/{{index . "sessionKey"}}
+
+PUBLISH EXAMPLE
+	// plain js
+	socket = new WebSocket("ws://{{index . "host"}}/{{index . "sessionKey"}}");
+	socket.send("Hello room {{ index . "sessionKey" }}");
+
+SUBSCRIBE EXAMPLE
+	// plain js
+	socket = new WebSocket("ws://{{index . "host"}}/{{index . "sessionKey"}}");
+	socket.addEventListener("message", (e) => {
+		console.log(`FROM RELAY: ${e.data}`);
+	});
+
+SOURCE
+	https://github.com/chau-t-tran/ws-to-me
 		</pre>
 	</body>
 <html>
