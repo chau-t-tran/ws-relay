@@ -19,7 +19,11 @@ func getTemplateGlob() (*template.Template, error) {
 	var tg *template.Template
 	var err error
 
-	tg, err = template.ParseGlob("templates/*.html")
+	tg, err = template.ParseGlob("*.html")
+
+	if err != nil {
+		tg, err = template.ParseGlob("templates/*.html")
+	}
 
 	if err != nil {
 		tg, err = template.ParseGlob("../templates/*.html")
