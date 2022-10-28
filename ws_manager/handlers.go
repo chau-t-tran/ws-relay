@@ -28,6 +28,7 @@ func (sm *SessionManager) RegisterHandler(c echo.Context) error {
 func (sm *SessionManager) RootHandler(c echo.Context) error {
 	sessionKey := utils.RandomKey()
 	sm.RegisterSession(sessionKey)
+	log.Println("Registered", sessionKey)
 	return c.Render(http.StatusOK, "index.html", map[string]interface{}{
 		"sessionKey": sessionKey,
 		"host":       c.Request().Host,
